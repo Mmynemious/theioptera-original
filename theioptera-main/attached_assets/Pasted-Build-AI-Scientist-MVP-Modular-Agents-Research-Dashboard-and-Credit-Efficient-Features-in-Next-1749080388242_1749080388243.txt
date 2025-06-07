@@ -1,0 +1,182 @@
+Build “AI Scientist MVP” – Modular Agents, Research Dashboard, and Credit-Efficient Features in Next.js (Vercel-ready)
+
+🧠 CONTEXT
+This is a modular research assistant for biomedical hypothesis generation. Build the MVP in Next.js (app or pages router) with Vercel-deployable structure. The entire code must:
+
+Be broken down one component at a time
+
+Use JSON stub data only (no actual API/LLM usage)
+
+Stay within Replit’s credit limits by reusing logic, stubbing expensive calls, and storing memory in localStorage
+
+Avoid generating the entire project at once
+
+✅ STEP 1: AgentCard Component
+Task:
+Create AgentCard.tsx in /components.
+
+Features:
+
+Takes 3 props: title, endpoint, onRun()
+
+Shows agent result, confidence score, and status icon
+
+Add a runAgent() button → fetch from endpoint
+
+Stub result should be displayed in a card
+
+Reuse across all agents
+
+ts
+Kopieren
+Bearbeiten
+// components/AgentCard.tsx
+export default function AgentCard({ title, endpoint }: { title: string; endpoint: string }) {
+  const [data, setData] = useState(null);
+  const runAgent = async () => {
+    const res = await fetch(`${endpoint}?q=test`);
+    const json = await res.json();
+    setData(json);
+  };
+  return (
+    <div>
+      <h2>{title}</h2>
+      <button onClick={runAgent}>Run Agent</button>
+      {data && <pre>{JSON.stringify(data, null, 2)}</pre>}
+    </div>
+  );
+}
+✅ STEP 2: Basic Page Routing
+Create the following pages using pages/ routing:
+
+pgsql
+Kopieren
+Bearbeiten
+pages/
+├── index.tsx        → Ask question and route to /dashboard
+├── dashboard.tsx    → Show all AgentCards
+├── profile.tsx      → Edit + store researcher profile
+├── sessions.tsx     → List + compare past sessions
+├── thinking.tsx     → Socratic chatbot
+├── evidence.tsx     → Supporting vs opposing papers
+✅ STEP 3: API Routes with Stub Logic
+Each agent lives in /api and must return JSON like:
+
+ts
+Kopieren
+Bearbeiten
+// api/thesis.ts
+export default function handler(req, res) {
+  const q = req.query.q || "default";
+  res.status(200).json({
+    result: `Stubbed ThesisAgent result for "${q}"`,
+    input_used: q,
+    confidence: Math.random(),
+    warnings: [],
+    sources: ["arXiv:1234.5678"]
+  });
+}
+✅ Create files:
+
+arduino
+Kopieren
+Bearbeiten
+api/
+├── thesis.ts
+├── search.ts
+├── summarize.ts
+├── trend.ts
+├── hypothesis.ts
+├── evaluate.ts
+├── map.ts
+├── thinking.ts
+├── evidence.ts
+✅ STEP 4: Dashboard Page with All Agents
+In /pages/dashboard.tsx, import and render AgentCard for each endpoint.
+
+tsx
+Kopieren
+Bearbeiten
+<AgentCard title="Thesis Agent" endpoint="/api/thesis" />
+<AgentCard title="Search Agent" endpoint="/api/search" />
+...
+<AgentCard title="Map Agent" endpoint="/api/map" />
+Bonus: Add a simple status object like:
+
+ts
+Kopieren
+Bearbeiten
+{
+  "SearchAgent": "completed",
+  "TrendAgent": "pending"
+}
+Show ✅ ⏳ ⚠️ icons based on this state.
+
+✅ STEP 5: MapAgent Visual Output (Mermaid)
+In api/map.ts, return:
+
+json
+Kopieren
+Bearbeiten
+{
+  "map": "graph TD;\nA[Question] --> B[Variables];\nB --> C[Search Results];\nC --> D[Trends];\nD --> E[Hypothesis];\nE --> F[Confidence Score]",
+  "format": "mermaid"
+}
+In dashboard.tsx, render this as:
+
+Markdown (if mermaid.js is supported)
+
+OR fallback to <pre> block
+
+✅ STEP 6: Thinking Agent (Socratic Feedback)
+Page: /pages/thinking.tsx
+API: /api/thinking.ts
+
+Returns:
+
+json
+Kopieren
+Bearbeiten
+{
+  "questions": [
+    "Why does the hypothesis depend on X if the opposing papers challenge X?",
+    "How recent are your top 5 papers?",
+    "Are all papers using the same model organism?"
+  ]
+}
+Allow user text input for reflection (optional).
+
+✅ STEP 7: Evidence Agent (Support vs Oppose)
+Page: /pages/evidence.tsx
+API: /api/evidence.ts
+
+Returns:
+
+json
+Kopieren
+Bearbeiten
+{
+  "supporting": [{ "title": "Paper A", "stance": "support", "score": 0.91 }],
+  "opposing": [{ "title": "Paper B", "stance": "oppose", "score": 0.94 }]
+}
+Render 2 tables in evidence.tsx.
+
+✅ STEP 8: Profile & Session Storage
+Profile page: /pages/profile.tsx
+
+Save researcher info: name, email, field, institution
+
+Store in localStorage
+
+Use useState or Zustand for editing
+
+Pass profile data to agents as context
+
+Sessions page: /pages/sessions.tsx
+
+Load past session JSON (stubbed)
+
+Show project name, question, score
+
+Enable "Compare Hypotheses"
+
